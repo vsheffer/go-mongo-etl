@@ -1,0 +1,16 @@
+**/target
+**/nbactions.xml
+**/nb-configuration.xml
+
+#Patches
+**/*.patch
+
+#Idea files
+**/.idea
+**/*.iml
+
+#Eclipse especified files:
+**/.classpath
+**/.project
+**/.DS_Store
+**/.settings/**
