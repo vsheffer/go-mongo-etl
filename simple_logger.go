@@ -3,22 +3,21 @@ package main
 import (
 	"flag"
 	"github.com/vsheffer/go-mongo-etl/gomongo"
-	"gopkg.in/mgo.v2/bson"
 	"log"
 )
 
 type SimpleLogger struct{}
 
-func (sl *SimpleLogger) OnDelete(deleted bson.M) {
-	log.Printf("Deleted %+v", deleted)
+func (sl *SimpleLogger) OnDelete(event *gooplog.OpLoggerEvent) {
+	log.Printf("Deleted %s %+v", event.Id, event.Data)
 }
 
-func (sl *SimpleLogger) OnInsert(inserted bson.M) {
-	log.Printf("Inserted %+v", inserted)
+func (sl *SimpleLogger) OnInsert(event *gooplog.OpLoggerEvent) {
+	log.Printf("Inserted %s %+v", event.Id, event.Data)
 }
 
-func (sl *SimpleLogger) OnUpdate(updated bson.M) {
-	log.Printf("Updated %+v", updated)
+func (sl *SimpleLogger) OnUpdate(event *gooplog.OpLoggerEvent) {
+	log.Printf("Updated %s %+v", event.Id, event.Data)
 }
 
 func main() {

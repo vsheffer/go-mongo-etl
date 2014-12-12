@@ -14,17 +14,22 @@ import (
 	"time"
 )
 
+type OpLoggerEvent struct {
+	Id   string
+	Data bson.M
+}
+
 // The interface that must be implemented and registered with OpLogTailer
 // class so that the events can be dispatched to it.
 type OpLogger interface {
 	// Method called when the OpLogTailer receives a deletion operation.
-	OnDelete(deleted bson.M)
+	OnDelete(event *OpLoggerEvent)
 
 	// Method called when the OpLogTailer receives an update operation.
-	OnUpdate(updated bson.M)
+	OnUpdate(event *OpLoggerEvent)
 
 	// Method called when the OpLogTailer receives an insert operation.
-	OnInsert(inserted bson.M)
+	OnInsert(event *OpLoggerEvent)
 }
 
 type OpLogTailer struct {
@@ -51,7 +56,7 @@ type opLogEntry struct {
 	Op string              "op"
 	Ns string              "ns"
 	O  bson.M              "o"
-	O2 ObjectId            `bson:"o2,inline"`
+	O2 ObjectId            `bson:"o2"`
 }
 
 var tailerInfoCollection *mgo.Collection
@@ -146,15 +151,18 @@ func (olt *OpLogTailer) Start() error {
 			}()
 
 			go func(result opLogEntry) {
+				event := &OpLoggerEvent{
+					Id:   result.O2.Id,
+					Data: result.O}
 				switch result.Op {
 				case "u":
-					olt.opLogger.OnUpdate(result.O)
+					olt.opLogger.OnUpdate(event)
 					return
 				case "i":
-					olt.opLogger.OnInsert(result.O)
+					olt.opLogger.OnInsert(event)
 					return
 				case "d":
-					olt.opLogger.OnDelete(result.O)
+					olt.opLogger.OnDelete(event)
 					return
 				}
 			}(result)
